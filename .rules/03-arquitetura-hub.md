@@ -25,5 +25,5 @@ Ao adicionar uma nova ferramenta ao hub, ela deve:
 
 - [x] Hub definido conceitualmente (este documento)
 - [x] Implementação do hub — `index.html`, `css/main.css`, `js/tools.js`, `js/hub.js` (ver `.tasks/hub-ferramentas.md`)
-- [ ] Publicação no GitHub Pages
+- [x] Publicação no GitHub Pages — `https://brpsolucoes.github.io/eloja-tools/`
 - [x] Primeira ferramenta: calculadora de precificação 3D — `tools/precificacao-3d/` (ver `.specs/calculadora-precificacao-3d.md`)

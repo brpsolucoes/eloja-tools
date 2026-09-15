@@ -5,8 +5,8 @@ Referência: [[hub-ferramentas]] (spec)
 ## Setup do projeto
 
 - [x] Definir e configurar a stack técnica (HTML/CSS/JS puro, sem build, ver [[01-stack-tecnica]])
-- [ ] Configurar deploy automático para GitHub Pages (GitHub Actions ou publicação direta da branch)
-- [ ] Confirmar funcionamento em `usuario.github.io/eloja-tools` (paths relativos já usados no código)
+- [x] Configurar deploy para GitHub Pages (publicação direta da branch `main`)
+- [x] Confirmar funcionamento em `brpsolucoes.github.io/eloja-tools` (paths relativos já usados no código)
 
 ## Layout base
 
@@ -29,5 +29,5 @@ Referência: [[hub-ferramentas]] (spec)
 ## Finalização
 
 - [x] Testar localmente (servidor estático simples)
-- [ ] Publicar primeira versão no GitHub Pages
+- [x] Publicar primeira versão no GitHub Pages
 - [ ] Validar em desktop e mobile (dispositivo real)
