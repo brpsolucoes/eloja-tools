@@ -2,7 +2,13 @@
 <html lang="pt-BR">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+  <meta name="theme-color" content="#f7f6f3" media="(prefers-color-scheme: light)" />
+  <meta name="theme-color" content="#f7f6f3" media="(prefers-color-scheme: dark)" />
+  <meta name="mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="default" />
+  <meta name="apple-mobile-web-app-title" content="Precificação 3D" />
   <title>Calculadora de Precificação 3D — eloja-tools</title>
   <link rel="stylesheet" href="../../css/main.css" />
   <link rel="stylesheet" href="calc.css" />
@@ -11,6 +17,7 @@
   <div class="page">
     <header class="site-header">
       <a class="site-header__back" href="../../index.html">← Hub</a>
+      <span class="site-header__title">Precificação 3D</span>
     </header>
 
     <h1 class="page-title">Calculadora de Precificação 3D</h1>
@@ -18,33 +25,37 @@
       Preencha os custos da peça para ver o custo total e o preço de venda sugerido.
     </p>
 
-    <section class="form-section form-section--presets">
-      <h2 class="form-section__title"><span class="form-section__icon">📁</span>Produto e modelos salvos</h2>
-      <p class="form-section__hint">O nome do produto entra no resumo copiado. Salve como modelo se for uma peça que você reimprime com frequência.</p>
-      <div class="presets-bar">
-        <select id="preset-select">
-          <option value="">— Nenhum modelo carregado —</option>
-        </select>
-        <button type="button" class="button" id="preset-delete" hidden>🗑️ Excluir</button>
-      </div>
-      <div class="presets-save">
-        <input type="text" id="preset-name" placeholder="Nome do produto (ex.: Suporte de celular)" />
-        <button type="button" class="button button--primary" id="preset-save">💾 Salvar como modelo</button>
-      </div>
-      <p class="field-note" id="preset-note" hidden></p>
+    <section class="form-section form-section--presets is-collapsed">
+      <h2 class="form-section__title" role="button" tabindex="0" aria-expanded="false" aria-controls="section-body-presets">
+        <span class="form-section__icon">📁</span>Produto e modelos salvos<span class="form-section__chevron" aria-hidden="true">⌄</span>
+      </h2>
+      <div class="form-section__body" id="section-body-presets">
+        <p class="form-section__hint">O nome do produto entra no resumo copiado. Salve como modelo se for uma peça que você reimprime com frequência.</p>
+        <div class="presets-bar">
+          <select id="preset-select">
+            <option value="">— Nenhum modelo carregado —</option>
+          </select>
+          <button type="button" class="button" id="preset-delete" hidden>🗑️ Excluir</button>
+        </div>
+        <div class="presets-save">
+          <input type="text" id="preset-name" placeholder="Nome do produto (ex.: Suporte de celular)" />
+          <button type="button" class="button button--primary" id="preset-save">💾 Salvar como modelo</button>
+        </div>
+        <p class="field-note" id="preset-note" hidden></p>
 
-      <div class="presets-io">
-        <button type="button" class="button" id="preset-export">⬇️ Exportar modelos</button>
-        <button type="button" class="button" id="preset-import-trigger">⬆️ Importar modelos</button>
-        <input type="file" id="preset-import-file" accept="application/json,.json" hidden />
-      </div>
+        <div class="presets-io">
+          <button type="button" class="button" id="preset-export">⬇️ Exportar modelos</button>
+          <button type="button" class="button" id="preset-import-trigger">⬆️ Importar modelos</button>
+          <input type="file" id="preset-import-file" accept="application/json,.json" hidden />
+        </div>
 
-      <div class="import-picker" id="import-picker" hidden>
-        <p class="import-picker__title">Escolha quais produtos importar:</p>
-        <div class="import-picker__list" id="import-picker-list"></div>
-        <div class="import-picker__actions">
-          <button type="button" class="button button--primary" id="import-picker-confirm">Importar selecionados</button>
-          <button type="button" class="button" id="import-picker-cancel">Cancelar</button>
+        <div class="import-picker" id="import-picker" hidden>
+          <p class="import-picker__title">Escolha quais produtos importar:</p>
+          <div class="import-picker__list" id="import-picker-list"></div>
+          <div class="import-picker__actions">
+            <button type="button" class="button button--primary" id="import-picker-confirm">Importar selecionados</button>
+            <button type="button" class="button" id="import-picker-cancel">Cancelar</button>
+          </div>
         </div>
       </div>
     </section>
@@ -52,118 +63,142 @@
     <div class="calculator-layout">
       <form id="calc-form">
         <section class="form-section form-section--marketplace">
-          <h2 class="form-section__title"><span class="form-section__icon">🛒</span>Onde a peça será vendida?</h2>
-          <p class="form-section__hint">As taxas do marketplace escolhido entram automaticamente no cálculo.</p>
-          <div class="form-grid">
-            <div class="field">
-              <label for="marketplace">Marketplace</label>
-              <select id="marketplace" name="marketplace"></select>
+          <h2 class="form-section__title" role="button" tabindex="0" aria-expanded="true" aria-controls="section-body-marketplace">
+            <span class="form-section__icon">🛒</span>Onde a peça será vendida?<span class="form-section__chevron" aria-hidden="true">⌄</span>
+          </h2>
+          <div class="form-section__body" id="section-body-marketplace">
+            <p class="form-section__hint">As taxas do marketplace escolhido entram automaticamente no cálculo.</p>
+            <div class="form-grid">
+              <div class="field">
+                <label for="marketplace">Marketplace</label>
+                <select id="marketplace" name="marketplace"></select>
+              </div>
             </div>
+            <p class="field-note" id="marketplace-note"></p>
           </div>
-          <p class="field-note" id="marketplace-note"></p>
         </section>
 
         <section class="form-section form-section--filament">
-          <h2 class="form-section__title"><span class="form-section__icon">🧵</span>Filamento</h2>
-          <div class="radio-group" id="weight-mode-group">
-            <label><input type="radio" name="weightMode" value="direct" checked /> Peso direto da peça</label>
-            <label><input type="radio" name="weightMode" value="diff" /> Peso restante do carretel</label>
-          </div>
-          <div class="form-grid form-grid--spaced">
-            <div class="field" id="weight-direct-field">
-              <label for="weightUsedG">Peso usado na peça (g)</label>
-              <input type="number" id="weightUsedG" name="weightUsedG" min="0" step="0.1" value="0" />
+          <h2 class="form-section__title" role="button" tabindex="0" aria-expanded="true" aria-controls="section-body-filament">
+            <span class="form-section__icon">🧵</span>Filamento<span class="form-section__chevron" aria-hidden="true">⌄</span>
+          </h2>
+          <div class="form-section__body" id="section-body-filament">
+            <div class="radio-group" id="weight-mode-group">
+              <label><input type="radio" name="weightMode" value="direct" checked /> Peso direto da peça</label>
+              <label><input type="radio" name="weightMode" value="diff" /> Peso restante do carretel</label>
             </div>
-            <div class="field" id="weight-before-field" hidden>
-              <label for="weightBeforeG">Peso do carretel antes de imprimir (g)</label>
-              <input type="number" id="weightBeforeG" name="weightBeforeG" min="0" step="0.1" value="0" />
+            <div class="form-grid form-grid--spaced">
+              <div class="field" id="weight-direct-field">
+                <label for="weightUsedG">Peso usado na peça (g)</label>
+                <input type="number" id="weightUsedG" name="weightUsedG" min="0" step="0.1" value="0" />
+              </div>
+              <div class="field" id="weight-before-field" hidden>
+                <label for="weightBeforeG">Peso do carretel antes de imprimir (g)</label>
+                <input type="number" id="weightBeforeG" name="weightBeforeG" min="0" step="0.1" value="0" />
+              </div>
+              <div class="field" id="weight-after-field" hidden>
+                <label for="weightAfterG">Peso do carretel depois de imprimir (g)</label>
+                <input type="number" id="weightAfterG" name="weightAfterG" min="0" step="0.1" value="0" />
+              </div>
             </div>
-            <div class="field" id="weight-after-field" hidden>
-              <label for="weightAfterG">Peso do carretel depois de imprimir (g)</label>
-              <input type="number" id="weightAfterG" name="weightAfterG" min="0" step="0.1" value="0" />
-            </div>
-          </div>
-          <p class="field-note" id="weight-diff-note" hidden></p>
-          <div class="form-grid form-grid--spaced">
-            <div class="field">
-              <label for="spoolPriceBRL">Valor pago no carretel (R$)</label>
-              <input type="number" id="spoolPriceBRL" name="spoolPriceBRL" min="0" step="0.01" value="0" />
-            </div>
-            <div class="field">
-              <label for="spoolWeightKg">Peso do carretel (kg)</label>
-              <input type="number" id="spoolWeightKg" name="spoolWeightKg" min="0.01" step="0.01" value="1" />
+            <p class="field-note" id="weight-diff-note" hidden></p>
+            <div class="form-grid form-grid--spaced">
+              <div class="field">
+                <label for="spoolPriceBRL">Valor pago no carretel (R$)</label>
+                <input type="number" id="spoolPriceBRL" name="spoolPriceBRL" min="0" step="0.01" value="0" />
+              </div>
+              <div class="field">
+                <label for="spoolWeightKg">Peso do carretel (kg)</label>
+                <input type="number" id="spoolWeightKg" name="spoolWeightKg" min="0.01" step="0.01" value="1" />
+              </div>
             </div>
           </div>
         </section>
 
         <section class="form-section form-section--time">
-          <h2 class="form-section__title"><span class="form-section__icon">⏱️</span>Tempo e custos operacionais</h2>
-          <div class="form-grid">
-            <div class="field">
-              <label for="printHoursPart">Tempo de impressão</label>
-              <div class="time-input">
-                <input type="number" id="printHoursPart" name="printHoursPart" min="0" step="1" value="0" />
-                <span class="time-input__unit">h</span>
-                <input type="number" id="printMinutesPart" name="printMinutesPart" min="0" max="59" step="1" value="0" />
-                <span class="time-input__unit">min</span>
+          <h2 class="form-section__title" role="button" tabindex="0" aria-expanded="true" aria-controls="section-body-time">
+            <span class="form-section__icon">⏱️</span>Tempo e custos operacionais<span class="form-section__chevron" aria-hidden="true">⌄</span>
+          </h2>
+          <div class="form-section__body" id="section-body-time">
+            <div class="form-grid">
+              <div class="field">
+                <label for="printHoursPart">Tempo de impressão</label>
+                <div class="time-input">
+                  <input type="number" id="printHoursPart" name="printHoursPart" min="0" step="1" value="0" />
+                  <span class="time-input__unit">h</span>
+                  <input type="number" id="printMinutesPart" name="printMinutesPart" min="0" max="59" step="1" value="0" />
+                  <span class="time-input__unit">min</span>
+                </div>
+              </div>
+              <div class="field">
+                <label for="powerCostPerHour">Energia (R$/h)</label>
+                <input type="number" id="powerCostPerHour" name="powerCostPerHour" min="0" step="0.01" value="0.50" />
+              </div>
+              <div class="field">
+                <label for="wearCostPerHour">Desgaste/manutenção (R$/h)</label>
+                <input type="number" id="wearCostPerHour" name="wearCostPerHour" min="0" step="0.01" value="0.50" />
               </div>
             </div>
-            <div class="field">
-              <label for="powerCostPerHour">Energia (R$/h)</label>
-              <input type="number" id="powerCostPerHour" name="powerCostPerHour" min="0" step="0.01" value="0.50" />
+          </div>
+        </section>
+
+        <section class="form-section form-section--labor is-collapsed">
+          <h2 class="form-section__title" role="button" tabindex="0" aria-expanded="false" aria-controls="section-body-labor">
+            <span class="form-section__icon">🧑‍🔧</span>Mão de obra<span class="form-section__chevron" aria-hidden="true">⌄</span>
+          </h2>
+          <div class="form-section__body" id="section-body-labor">
+            <div class="radio-group" id="labor-mode-group">
+              <label><input type="radio" name="laborMode" value="fixed" checked /> Valor fixo</label>
+              <label><input type="radio" name="laborMode" value="hourly" /> Horas × valor/hora</label>
             </div>
-            <div class="field">
-              <label for="wearCostPerHour">Desgaste/manutenção (R$/h)</label>
-              <input type="number" id="wearCostPerHour" name="wearCostPerHour" min="0" step="0.01" value="0.50" />
+            <div class="form-grid form-grid--spaced">
+              <div class="field" id="labor-fixed-field">
+                <label for="laborFixedValue">Valor fixo (R$)</label>
+                <input type="number" id="laborFixedValue" name="laborFixedValue" min="0" step="0.01" value="0" />
+              </div>
+              <div class="field" id="labor-hours-field" hidden>
+                <label for="laborHours">Horas de mão de obra</label>
+                <input type="number" id="laborHours" name="laborHours" min="0" step="0.1" value="0" />
+              </div>
+              <div class="field" id="labor-rate-field" hidden>
+                <label for="laborHourlyRate">Valor por hora (R$)</label>
+                <input type="number" id="laborHourlyRate" name="laborHourlyRate" min="0" step="0.01" value="0" />
+              </div>
             </div>
           </div>
         </section>
 
-        <section class="form-section form-section--labor">
-          <h2 class="form-section__title"><span class="form-section__icon">🧑‍🔧</span>Mão de obra</h2>
-          <div class="radio-group" id="labor-mode-group">
-            <label><input type="radio" name="laborMode" value="fixed" checked /> Valor fixo</label>
-            <label><input type="radio" name="laborMode" value="hourly" /> Horas × valor/hora</label>
-          </div>
-          <div class="form-grid form-grid--spaced">
-            <div class="field" id="labor-fixed-field">
-              <label for="laborFixedValue">Valor fixo (R$)</label>
-              <input type="number" id="laborFixedValue" name="laborFixedValue" min="0" step="0.01" value="0" />
+        <section class="form-section form-section--extra is-collapsed">
+          <h2 class="form-section__title" role="button" tabindex="0" aria-expanded="false" aria-controls="section-body-extra">
+            <span class="form-section__icon">📦</span>Custos extras<span class="form-section__chevron" aria-hidden="true">⌄</span>
+          </h2>
+          <div class="form-section__body" id="section-body-extra">
+            <p class="form-section__hint">Embalagem, gancho, etiqueta, frete de insumos, taxa de falha etc.</p>
+            <div class="extra-items__header">
+              <span>Nome do custo</span>
+              <span>Valor (R$)</span>
             </div>
-            <div class="field" id="labor-hours-field" hidden>
-              <label for="laborHours">Horas de mão de obra</label>
-              <input type="number" id="laborHours" name="laborHours" min="0" step="0.1" value="0" />
-            </div>
-            <div class="field" id="labor-rate-field" hidden>
-              <label for="laborHourlyRate">Valor por hora (R$)</label>
-              <input type="number" id="laborHourlyRate" name="laborHourlyRate" min="0" step="0.01" value="0" />
-            </div>
+            <div class="extra-items" id="extra-items"></div>
+            <button type="button" class="button" id="add-extra-item">+ Adicionar custo extra</button>
           </div>
         </section>
 
-        <section class="form-section form-section--extra">
-          <h2 class="form-section__title"><span class="form-section__icon">📦</span>Custos extras</h2>
-          <p class="form-section__hint">Embalagem, gancho, etiqueta, frete de insumos, taxa de falha etc.</p>
-          <div class="extra-items__header">
-            <span>Nome do custo</span>
-            <span>Valor (R$)</span>
-          </div>
-          <div class="extra-items" id="extra-items"></div>
-          <button type="button" class="button" id="add-extra-item">+ Adicionar custo extra</button>
-        </section>
-
-        <section class="form-section form-section--margin">
-          <h2 class="form-section__title"><span class="form-section__icon">📈</span>Margem e anúncios</h2>
-          <div class="form-grid">
-            <div class="field">
-              <label for="marginPercent">Lucro desejado sobre o custo (%)</label>
-              <input type="number" id="marginPercent" name="marginPercent" min="0" step="1" value="30" />
-              <span class="field-note">Markup sobre filamento + custos extras. Mão de obra, energia e desgaste já entram pelo valor final, sem essa margem em cima. Pode passar de 100%.</span>
-            </div>
-            <div class="field">
-              <label for="roas">ROAS do anúncio (opcional)</label>
-              <input type="number" id="roas" name="roas" min="0" step="0.1" placeholder="Ex.: 4" />
-              <span class="field-note">Retorno sobre o investimento em anúncio. Deixe em branco para venda orgânica (sem anúncio).</span>
+        <section class="form-section form-section--margin is-collapsed">
+          <h2 class="form-section__title" role="button" tabindex="0" aria-expanded="false" aria-controls="section-body-margin">
+            <span class="form-section__icon">📈</span>Margem e anúncios<span class="form-section__chevron" aria-hidden="true">⌄</span>
+          </h2>
+          <div class="form-section__body" id="section-body-margin">
+            <div class="form-grid">
+              <div class="field">
+                <label for="marginPercent">Lucro desejado sobre o custo (%)</label>
+                <input type="number" id="marginPercent" name="marginPercent" min="0" step="1" value="30" />
+                <span class="field-note">Markup sobre filamento + custos extras. Mão de obra, energia e desgaste já entram pelo valor final, sem essa margem em cima. Pode passar de 100%.</span>
+              </div>
+              <div class="field">
+                <label for="roas">ROAS do anúncio (opcional)</label>
+                <input type="number" id="roas" name="roas" min="0" step="0.1" placeholder="Ex.: 4" />
+                <span class="field-note">Retorno sobre o investimento em anúncio. Deixe em branco para venda orgânica (sem anúncio).</span>
+              </div>
             </div>
           </div>
         </section>
@@ -180,7 +215,16 @@
       <span class="mobile-price-bar__label">Preço sugerido</span>
       <span class="mobile-price-bar__value" id="mobile-price-value">—</span>
     </div>
-    <a href="#result" class="button button--primary">Ver detalhes</a>
+    <button type="button" class="button button--primary" id="mobile-sheet-open">Ver detalhes</button>
+  </div>
+
+  <div class="sheet-backdrop" id="sheet-backdrop" hidden></div>
+  <div class="bottom-sheet" id="bottom-sheet" hidden aria-hidden="true" role="dialog" aria-label="Detalhamento do preço">
+    <div class="bottom-sheet__handle-area">
+      <div class="bottom-sheet__handle"></div>
+      <button type="button" class="bottom-sheet__close" id="sheet-close" aria-label="Fechar">✕</button>
+    </div>
+    <div class="bottom-sheet__body" id="sheet-body"></div>
   </div>
 
   <script src="../../js/marketplace-fees.js"></script>

@@ -64,6 +64,29 @@ body {
   border-bottom: 1px solid var(--color-border);
 }
 
+.site-header__title {
+  margin-left: auto;
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--color-text-muted);
+}
+
+/* Em telas de celular o header vira uma barra de app: fica fixa no topo,
+   encolhe e ganha um leve desfoque atrás do conteúdo que passa por baixo. */
+@media (max-width: 640px) {
+  .site-header {
+    position: sticky;
+    top: 0;
+    z-index: 30;
+    margin: 0 -24px 8px;
+    padding: max(12px, env(safe-area-inset-top)) 24px 12px;
+    background: var(--color-bg);
+    background: color-mix(in srgb, var(--color-bg) 88%, transparent);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+  }
+}
+
 .site-header__home {
   display: flex;
   align-items: center;

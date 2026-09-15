@@ -40,6 +40,13 @@
 
   const mobilePriceBar = document.getElementById("mobile-price-bar");
   const mobilePriceValue = document.getElementById("mobile-price-value");
+  const mobileSheetOpenButton = document.getElementById("mobile-sheet-open");
+
+  const resultPanel = document.querySelector(".result-panel");
+  const sheetBackdrop = document.getElementById("sheet-backdrop");
+  const bottomSheet = document.getElementById("bottom-sheet");
+  const sheetBody = document.getElementById("sheet-body");
+  const sheetCloseButton = document.getElementById("sheet-close");
 
   const currencyFormatter = new Intl.NumberFormat("pt-BR", { style: "currency", currency: "BRL" });
   const percentFormatter = new Intl.NumberFormat("pt-BR", { maximumFractionDigits: 1 });
@@ -776,6 +783,82 @@
     recalculate();
   }
 
+  // --- Acordeão de seções (mobile) ------------------------------------------
+  // O clique/toque funciona em qualquer largura, mas só tem efeito visual no
+  // celular: a regra que esconde `.form-section__body` fica só dentro do
+  // media query de calc.css, então no desktop as seções continuam sempre
+  // abertas, do jeito que já estava.
+
+  function initSectionAccordion() {
+    const headers = Array.from(document.querySelectorAll(".form-section__title[role='button']"));
+    headers.forEach(function (header) {
+      function toggle() {
+        const section = header.closest(".form-section");
+        const collapsed = section.classList.toggle("is-collapsed");
+        header.setAttribute("aria-expanded", String(!collapsed));
+      }
+      header.addEventListener("click", toggle);
+      header.addEventListener("keydown", function (event) {
+        if (event.key === "Enter" || event.key === " ") {
+          event.preventDefault();
+          toggle();
+        }
+      });
+    });
+  }
+
+  // --- Bottom sheet do resultado (mobile) ------------------------------------
+  // No desktop #result mora sempre dentro de .result-panel. No celular ele é
+  // fisicamente movido pra dentro do bottom sheet, que só aparece quando o
+  // usuário toca em "Ver detalhes" na barra de preço fixa.
+
+  const mobileMediaQuery = window.matchMedia("(max-width: 640px)");
+
+  function placeResultNode() {
+    if (mobileMediaQuery.matches) {
+      if (resultContainer.parentElement !== sheetBody) sheetBody.appendChild(resultContainer);
+    } else {
+      if (resultContainer.parentElement !== resultPanel) resultPanel.appendChild(resultContainer);
+      closeSheet();
+    }
+  }
+
+  function openSheet() {
+    bottomSheet.hidden = false;
+    sheetBackdrop.hidden = false;
+    document.body.style.overflow = "hidden";
+    window.requestAnimationFrame(function () {
+      bottomSheet.classList.add("is-open");
+      sheetBackdrop.classList.add("is-open");
+    });
+    bottomSheet.setAttribute("aria-hidden", "false");
+  }
+
+  function closeSheet() {
+    if (bottomSheet.hidden) return;
+    bottomSheet.classList.remove("is-open");
+    sheetBackdrop.classList.remove("is-open");
+    bottomSheet.setAttribute("aria-hidden", "true");
+    document.body.style.overflow = "";
+    window.setTimeout(function () {
+      if (!bottomSheet.classList.contains("is-open")) {
+        bottomSheet.hidden = true;
+        sheetBackdrop.hidden = true;
+      }
+    }, 300);
+  }
+
+  function initBottomSheet() {
+    placeResultNode();
+    mobileMediaQuery.addEventListener("change", placeResultNode);
+    mobileSheetOpenButton.addEventListener("click", openSheet);
+    sheetCloseButton.addEventListener("click", closeSheet);
+    sheetBackdrop.addEventListener("click", closeSheet);
+    document.addEventListener("keydown", function (event) {
+      if (event.key === "Escape") closeSheet();
+    });
+  }
+
   // --- Inicialização -------------------------------------------------------
 
   populateMarketplaceSelect();
@@ -814,6 +897,9 @@
 
   form.addEventListener("input", onAnyChange);
   extraItemsContainer.addEventListener("input", onAnyChange);
+
+  initSectionAccordion();
+  initBottomSheet();
 
   recalculate();
 })();
