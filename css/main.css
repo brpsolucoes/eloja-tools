@@ -1,0 +1,189 @@
+/* eloja-tools — tema compartilhado (estilo minimalista, inspirado no Notion) */
+
+:root {
+  --color-bg: #ffffff;
+  --color-surface: #ffffff;
+  --color-border: #e9e9e7;
+  --color-text: #37352f;
+  --color-text-muted: #6b6a66;
+  --color-accent: #2383e2;
+  --color-accent-bg: #edf3fb;
+
+  --radius: 8px;
+  --max-width: 880px;
+  --shadow-card: 0 1px 2px rgba(15, 15, 15, 0.04);
+  --shadow-card-hover: 0 2px 6px rgba(15, 15, 15, 0.08);
+
+  color-scheme: light;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  background: var(--color-bg);
+  color: var(--color-text);
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", system-ui,
+    Helvetica, Arial, sans-serif;
+  font-size: 16px;
+  line-height: 1.5;
+  -webkit-font-smoothing: antialiased;
+}
+
+.page {
+  max-width: var(--max-width);
+  margin: 0 auto;
+  padding: 0 24px 64px;
+}
+
+/* Cabeçalho */
+
+.site-header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 28px 0 8px;
+}
+
+.site-header__home {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  text-decoration: none;
+  color: var(--color-text);
+  font-weight: 600;
+  font-size: 15px;
+}
+
+.site-header__logo {
+  font-size: 20px;
+  line-height: 1;
+}
+
+.site-header__back {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  text-decoration: none;
+  color: var(--color-text-muted);
+  font-size: 14px;
+  padding: 4px 0;
+}
+
+.site-header__back:hover {
+  color: var(--color-text);
+}
+
+/* Título de página */
+
+.page-title {
+  margin: 24px 0 4px;
+  font-size: 28px;
+  font-weight: 700;
+  letter-spacing: -0.01em;
+}
+
+.page-subtitle {
+  margin: 0 0 32px;
+  color: var(--color-text-muted);
+  font-size: 15px;
+}
+
+/* Grade de ferramentas */
+
+.tool-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+  gap: 12px;
+}
+
+.tool-card {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 16px;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius);
+  background: var(--color-surface);
+  text-decoration: none;
+  color: inherit;
+  box-shadow: var(--shadow-card);
+  transition: box-shadow 0.15s ease, border-color 0.15s ease;
+}
+
+.tool-card:hover {
+  box-shadow: var(--shadow-card-hover);
+  border-color: #d3d3d0;
+}
+
+.tool-card[aria-disabled="true"] {
+  cursor: default;
+  opacity: 0.6;
+}
+
+.tool-card[aria-disabled="true"]:hover {
+  box-shadow: var(--shadow-card);
+  border-color: var(--color-border);
+}
+
+.tool-card__icon {
+  font-size: 22px;
+  line-height: 1;
+}
+
+.tool-card__name {
+  font-weight: 600;
+  font-size: 15px;
+}
+
+.tool-card__description {
+  color: var(--color-text-muted);
+  font-size: 13px;
+  line-height: 1.4;
+}
+
+.tool-card__badge {
+  align-self: flex-start;
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+  color: var(--color-accent);
+  background: var(--color-accent-bg);
+  border-radius: 4px;
+  padding: 2px 6px;
+}
+
+/* Estado vazio */
+
+.empty-state {
+  padding: 32px 16px;
+  border: 1px dashed var(--color-border);
+  border-radius: var(--radius);
+  color: var(--color-text-muted);
+  text-align: center;
+  font-size: 14px;
+}
+
+/* Conteúdo simples de página interna (placeholder de ferramenta) */
+
+.tool-page {
+  padding: 40px 0;
+}
+
+.tool-page__notice {
+  margin-top: 16px;
+  padding: 16px;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius);
+  background: var(--color-accent-bg);
+  color: var(--color-text);
+  font-size: 14px;
+}
