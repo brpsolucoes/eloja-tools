@@ -6,6 +6,7 @@
 
   const STORAGE_KEY = "eloja-tools:precificacao-3d:custos-fixos";
   const PRESETS_KEY = "eloja-tools:precificacao-3d:presets";
+  const PRESETS_EXPORT_TYPE = "eloja-tools:precificacao-3d:presets";
 
   const form = document.getElementById("calc-form");
   const marketplaceSelect = document.getElementById("marketplace");
@@ -28,6 +29,14 @@
   const presetSaveButton = document.getElementById("preset-save");
   const presetDeleteButton = document.getElementById("preset-delete");
   const presetNote = document.getElementById("preset-note");
+
+  const presetExportButton = document.getElementById("preset-export");
+  const presetImportTriggerButton = document.getElementById("preset-import-trigger");
+  const presetImportFileInput = document.getElementById("preset-import-file");
+  const importPicker = document.getElementById("import-picker");
+  const importPickerList = document.getElementById("import-picker-list");
+  const importPickerConfirmButton = document.getElementById("import-picker-confirm");
+  const importPickerCancelButton = document.getElementById("import-picker-cancel");
 
   const mobilePriceBar = document.getElementById("mobile-price-bar");
   const mobilePriceValue = document.getElementById("mobile-price-value");
@@ -355,6 +364,159 @@
     savePresets(remaining);
     populatePresetSelect(null);
     showPresetNote('Modelo "' + preset.name + '" excluído.');
+  });
+
+  // --- Exportar / importar modelos salvos -----------------------------------
+
+  // Garante um nome único acrescentando " (2)", " (3)"... — nunca sobrescreve
+  // um modelo existente nem descarta o que está sendo importado.
+  function uniquePresetName(name, existingNames) {
+    if (!existingNames.has(name)) return name;
+    let n = 2;
+    let candidate = name + " (" + n + ")";
+    while (existingNames.has(candidate)) {
+      n++;
+      candidate = name + " (" + n + ")";
+    }
+    return candidate;
+  }
+
+  let pendingImportItems = [];
+
+  presetExportButton.addEventListener("click", function () {
+    const presets = loadPresets();
+    if (presets.length === 0) {
+      showPresetNote("Nenhum modelo salvo para exportar.");
+      return;
+    }
+    const payload = {
+      type: PRESETS_EXPORT_TYPE,
+      version: 1,
+      exportedAt: new Date().toISOString(),
+      presets: presets.map(function (p) {
+        return { name: p.name, data: p.data };
+      }),
+    };
+    const blob = new Blob([JSON.stringify(payload, null, 2)], { type: "application/json" });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement("a");
+    link.href = url;
+    link.download = "eloja-tools-modelos-precificacao-3d.json";
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    URL.revokeObjectURL(url);
+  });
+
+  presetImportTriggerButton.addEventListener("click", function () {
+    presetImportFileInput.click();
+  });
+
+  presetImportFileInput.addEventListener("change", function () {
+    const file = presetImportFileInput.files && presetImportFileInput.files[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = function () {
+      let parsed;
+      try {
+        parsed = JSON.parse(reader.result);
+      } catch (e) {
+        showPresetNote("Arquivo inválido: não é um JSON legível.");
+        presetImportFileInput.value = "";
+        return;
+      }
+      const items = Array.isArray(parsed && parsed.presets) ? parsed.presets : null;
+      if (!items || items.length === 0) {
+        showPresetNote("Arquivo inválido ou sem modelos para importar.");
+        presetImportFileInput.value = "";
+        return;
+      }
+      openImportPicker(items);
+    };
+    reader.onerror = function () {
+      showPresetNote("Não foi possível ler o arquivo.");
+      presetImportFileInput.value = "";
+    };
+    reader.readAsText(file);
+  });
+
+  function openImportPicker(items) {
+    pendingImportItems = items;
+    const existingNames = new Set(
+      loadPresets().map(function (p) {
+        return p.name;
+      })
+    );
+    importPickerList.innerHTML = "";
+    items.forEach(function (item, index) {
+      const row = document.createElement("label");
+      row.className = "import-picker__item";
+
+      const checkbox = document.createElement("input");
+      checkbox.type = "checkbox";
+      checkbox.checked = true;
+      checkbox.dataset.index = String(index);
+      row.appendChild(checkbox);
+
+      const nameSpan = document.createElement("span");
+      nameSpan.textContent = (item && item.name) || "(sem nome)";
+      row.appendChild(nameSpan);
+
+      if (item && item.name && existingNames.has(item.name)) {
+        const renameNote = document.createElement("span");
+        renameNote.className = "import-picker__item-rename";
+        renameNote.textContent = "já existe — será renomeado";
+        row.appendChild(renameNote);
+      }
+
+      importPickerList.appendChild(row);
+    });
+    importPicker.hidden = false;
+  }
+
+  function closeImportPicker() {
+    importPicker.hidden = true;
+    importPickerList.innerHTML = "";
+    pendingImportItems = [];
+    presetImportFileInput.value = "";
+  }
+
+  importPickerCancelButton.addEventListener("click", closeImportPicker);
+
+  importPickerConfirmButton.addEventListener("click", function () {
+    const checkboxes = Array.from(importPickerList.querySelectorAll('input[type="checkbox"]:checked'));
+    if (checkboxes.length === 0) {
+      closeImportPicker();
+      return;
+    }
+    const presets = loadPresets();
+    const existingNames = new Set(
+      presets.map(function (p) {
+        return p.name;
+      })
+    );
+    let counter = 0;
+    let importedCount = 0;
+
+    checkboxes.forEach(function (checkbox) {
+      const item = pendingImportItems[Number(checkbox.dataset.index)];
+      if (!item || !item.data) return;
+      const baseName = ((item.name || "").trim()) || "Modelo importado";
+      const finalName = uniquePresetName(baseName, existingNames);
+      existingNames.add(finalName);
+      counter++;
+      presets.push({
+        id: "preset-import-" + Date.now() + "-" + counter,
+        name: finalName,
+        data: item.data,
+      });
+      importedCount++;
+    });
+
+    savePresets(presets);
+    populatePresetSelect(null);
+    closeImportPicker();
+    showPresetNote(importedCount + " modelo(s) importado(s).");
   });
 
   // --- Cálculo e renderização do resultado --------------------------------

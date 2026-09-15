@@ -91,9 +91,62 @@
 
 @media (max-width: 520px) {
   .presets-bar,
-  .presets-save {
+  .presets-save,
+  .presets-io {
     flex-direction: column;
   }
+}
+
+.presets-io {
+  display: flex;
+  gap: 8px;
+  margin-top: 10px;
+}
+
+.import-picker {
+  margin-top: 14px;
+  padding: 14px;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
+  background: var(--color-bg);
+}
+
+.import-picker__title {
+  margin: 0 0 8px;
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.import-picker__list {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  max-height: 220px;
+  overflow-y: auto;
+}
+
+.import-picker__item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 14px;
+}
+
+.import-picker__item input[type="checkbox"] {
+  width: 16px;
+  height: 16px;
+  flex-shrink: 0;
+}
+
+.import-picker__item-rename {
+  font-size: 12px;
+  color: var(--color-text-muted);
+}
+
+.import-picker__actions {
+  display: flex;
+  gap: 8px;
+  margin-top: 12px;
 }
 
 /* --- Peso por diferença -------------------------------------------------- */

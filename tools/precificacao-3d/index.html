@@ -32,6 +32,21 @@
         <button type="button" class="button button--primary" id="preset-save">💾 Salvar como modelo</button>
       </div>
       <p class="field-note" id="preset-note" hidden></p>
+
+      <div class="presets-io">
+        <button type="button" class="button" id="preset-export">⬇️ Exportar modelos</button>
+        <button type="button" class="button" id="preset-import-trigger">⬆️ Importar modelos</button>
+        <input type="file" id="preset-import-file" accept="application/json,.json" hidden />
+      </div>
+
+      <div class="import-picker" id="import-picker" hidden>
+        <p class="import-picker__title">Escolha quais produtos importar:</p>
+        <div class="import-picker__list" id="import-picker-list"></div>
+        <div class="import-picker__actions">
+          <button type="button" class="button button--primary" id="import-picker-confirm">Importar selecionados</button>
+          <button type="button" class="button" id="import-picker-cancel">Cancelar</button>
+        </div>
+      </div>
     </section>
 
     <div class="calculator-layout">
