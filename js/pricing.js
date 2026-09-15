@@ -61,13 +61,16 @@
 
   /**
    * Calcula o preço de venda sugerido resolvendo:
-   *   preço = custoBase * (1 + margem) + taxaFixa + (taxaPct + taxaAnuncio) * preço
+   *   preço = (custoComMarkup * (1 + margem) + custoFixo) + taxaFixa + (taxaPct + taxaAnuncio) * preço
    *
-   * A margem é um MARKUP sobre o custo (lucro = custoBase * margem%) — não uma
-   * fração do preço de venda. Por isso ela pode ser qualquer valor positivo,
-   * inclusive acima de 100% ("quero vender por 3x o custo" = margem 200%).
-   * Só a soma de taxa de marketplace + taxa de anúncio precisa ficar abaixo de
-   * 100%, já que essas duas são as únicas fatias proporcionais ao preço final.
+   * A margem é um MARKUP aplicado só sobre `markupCost` (lucro = markupCost *
+   * margem%) — não sobre o custo total nem sobre o preço de venda. `flatCost`
+   * (mão de obra, energia, desgaste) já é o valor final que se quer cobrar por
+   * ele, então entra no preço sem markup em cima. Por isso a margem pode ser
+   * qualquer valor positivo, inclusive acima de 100% ("quero vender markupCost
+   * por 3x" = margem 200%). Só a soma de taxa de marketplace + taxa de anúncio
+   * precisa ficar abaixo de 100%, já que essas duas são as únicas fatias
+   * proporcionais ao preço final.
    *
    * taxaAnuncio = 1 / ROAS (fração do preço de venda gasta em anúncios para
    * gerar aquela venda). Se ROAS não for informado (<= 0), assume-se venda
@@ -82,12 +85,14 @@
    * marketplace + taxa de anúncio somam 100% ou mais do preço, o que tornaria
    * o cálculo impossível (divisão por zero ou negativa) independente da margem.
    */
-  function calculateSuggestedPrice({ baseCost, feeTable, marginPercent, roas }) {
-    const cost = toNumber(baseCost);
+  function calculateSuggestedPrice({ markupCost, flatCost, feeTable, marginPercent, roas }) {
+    const markupBase = toNumber(markupCost);
+    const flat = toNumber(flatCost);
+    const cost = markupBase + flat;
     const margin = Math.max(0, toNumber(marginPercent) / 100);
     const roasValue = toNumber(roas);
     const adRate = roasValue > 0 ? 1 / roasValue : 0;
-    const costWithMarkup = cost * (1 + margin);
+    const costWithMarkup = markupBase * (1 + margin) + flat;
 
     const tiers = (feeTable && feeTable.tiers) || [{ min: 0, max: Infinity, pct: 0, fixed: 0 }];
 

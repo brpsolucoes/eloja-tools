@@ -107,7 +107,7 @@
   function saveFixedCosts() {
     const data = {
       spoolPriceBRL: form.spoolPriceBRL.value,
-      spoolWeightG: form.spoolWeightG.value,
+      spoolWeightKg: form.spoolWeightKg.value,
       powerCostPerHour: form.powerCostPerHour.value,
       wearCostPerHour: form.wearCostPerHour.value,
       laborMode: form.laborMode.value,
@@ -132,7 +132,7 @@
     if (!data) return;
 
     if (data.spoolPriceBRL != null) form.spoolPriceBRL.value = data.spoolPriceBRL;
-    if (data.spoolWeightG != null) form.spoolWeightG.value = data.spoolWeightG;
+    if (data.spoolWeightKg != null) form.spoolWeightKg.value = data.spoolWeightKg;
     if (data.powerCostPerHour != null) form.powerCostPerHour.value = data.powerCostPerHour;
     if (data.wearCostPerHour != null) form.wearCostPerHour.value = data.wearCostPerHour;
     if (data.laborFixedValue != null) form.laborFixedValue.value = data.laborFixedValue;
@@ -156,7 +156,7 @@
     const filamentCost = pricing.calculateFilamentCost({
       weightUsedG: form.weightUsedG.value,
       spoolPriceBRL: form.spoolPriceBRL.value,
-      spoolWeightG: form.spoolWeightG.value,
+      spoolWeightG: Number(form.spoolWeightKg.value) * 1000,
     });
 
     const timeCost = pricing.calculateTimeCost({
@@ -177,8 +177,14 @@
 
     const baseCost = pricing.calculateBaseCost({ filamentCost, timeCost, laborCost, extraCostsTotal });
 
+    // Filamento e extras (insumos reais) recebem a margem de lucro; mão de obra,
+    // energia e desgaste já são o valor final que se quer cobrar, sem markup.
+    const markupCost = filamentCost + extraCostsTotal;
+    const flatCost = timeCost + laborCost;
+
     const result = pricing.calculateSuggestedPrice({
-      baseCost,
+      markupCost,
+      flatCost,
       feeTable,
       marginPercent: form.marginPercent.value,
       roas: form.roas.value,
