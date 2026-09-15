@@ -433,10 +433,18 @@
 
   // --- Copiar resumo do resultado -------------------------------------------
 
+  function getSelectedPresetName() {
+    if (!presetSelect.value) return "";
+    const preset = loadPresets().find(function (p) {
+      return p.id === presetSelect.value;
+    });
+    return preset ? preset.name : "";
+  }
+
   function buildSummaryText(data) {
     const feeTable = data.feeTable;
     const marketplaceLabel = feeTable ? feeTable.label : marketplaceSelect.value;
-    const productName = presetNameInput.value.trim();
+    const productName = presetNameInput.value.trim() || getSelectedPresetName();
     const lines = [];
     if (productName) lines.push(productName);
     lines.push(
