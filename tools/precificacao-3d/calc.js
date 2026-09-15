@@ -326,7 +326,6 @@
     presets.push({ id: id, name: name, data: snapshotFormData() });
     savePresets(presets);
     populatePresetSelect(id);
-    presetNameInput.value = "";
     showPresetNote('Modelo "' + name + '" salvo.');
   });
 
@@ -338,6 +337,7 @@
     presetDeleteButton.hidden = !presetSelect.value;
     if (preset) {
       applyFormData(preset.data);
+      presetNameInput.value = preset.name;
       onAnyChange();
     }
   });
@@ -436,12 +436,15 @@
   function buildSummaryText(data) {
     const feeTable = data.feeTable;
     const marketplaceLabel = feeTable ? feeTable.label : marketplaceSelect.value;
-    const lines = [
+    const productName = presetNameInput.value.trim();
+    const lines = [];
+    if (productName) lines.push(productName);
+    lines.push(
       "Preço de venda sugerido: " + formatCurrency(data.result.price),
       "Custo total: " + formatCurrency(data.baseCost),
       "Lucro: " + formatCurrency(data.result.profit),
-      "Marketplace: " + marketplaceLabel,
-    ];
+      "Marketplace: " + marketplaceLabel
+    );
     return lines.join("\n");
   }
 
