@@ -55,6 +55,49 @@
     return currencyFormatter.format(Number.isFinite(value) ? value : 0);
   }
 
+  // Lê o valor de um campo numérico (aceita "," ou "." como separador
+  // decimal — ver enhanceNumericInput, que já digita normalizado pra ",").
+  function parseNumber(value) {
+    const n = Number(String(value).replace(",", "."));
+    return Number.isFinite(n) ? n : 0;
+  }
+
+  // --- Digitação dos campos numéricos ---------------------------------------
+  // Os campos numéricos são <input type="text"> (não type="number") de
+  // propósito: só type="text" permite ler/mover o cursor (selectionStart),
+  // necessário pra corrigir o zero à esquerda e aceitar vírgula sem que o
+  // comportamento dependa do idioma do navegador/SO.
+
+  function normalizeNumericValue(raw, allowDecimal) {
+    let value = raw.replace(/\./g, ",");
+    value = value.replace(allowDecimal ? /[^\d,]/g : /[^\d]/g, "");
+    if (allowDecimal) {
+      const firstComma = value.indexOf(",");
+      if (firstComma !== -1) {
+        value = value.slice(0, firstComma + 1) + value.slice(firstComma + 1).replace(/,/g, "");
+      }
+    }
+    // "0" e "0,5" continuam como estão; "0" seguido de outro dígito (ex.: ao
+    // digitar "1" com o "0" já lá) vira só o dígito novo, sem prefixo.
+    value = value.replace(/^0+(\d)/, "$1");
+    return value;
+  }
+
+  function enhanceNumericInput(input, allowDecimal) {
+    input.addEventListener("focus", function () {
+      input.select();
+    });
+    input.addEventListener("input", function () {
+      const original = input.value;
+      const cursor = input.selectionStart == null ? original.length : input.selectionStart;
+      const normalized = normalizeNumericValue(original, allowDecimal);
+      if (normalized === original) return;
+      const newCursor = Math.max(0, Math.min(normalized.length, cursor + (normalized.length - original.length)));
+      input.value = normalized;
+      input.setSelectionRange(newCursor, newCursor);
+    });
+  }
+
   // --- Marketplace select -------------------------------------------------
 
   function populateMarketplaceSelect() {
@@ -105,11 +148,11 @@
 
   function getWeightUsedG() {
     if (getWeightMode() === "diff") {
-      const before = Number(form.weightBeforeG.value) || 0;
-      const after = Number(form.weightAfterG.value) || 0;
+      const before = parseNumber(form.weightBeforeG.value);
+      const after = parseNumber(form.weightAfterG.value);
       return Math.max(0, before - after);
     }
-    return Number(form.weightUsedG.value) || 0;
+    return parseNumber(form.weightUsedG.value);
   }
 
   function updateWeightDiffNote() {
@@ -122,8 +165,8 @@
   // --- Tempo de impressão: horas + minutos ---------------------------------
 
   function getPrintHours() {
-    const hoursPart = Number(form.printHoursPart.value) || 0;
-    const minutesPart = Number(form.printMinutesPart.value) || 0;
+    const hoursPart = parseNumber(form.printHoursPart.value);
+    const minutesPart = parseNumber(form.printMinutesPart.value);
     return hoursPart + minutesPart / 60;
   }
 
@@ -140,12 +183,12 @@
     nameInput.value = name || "";
 
     const valueInput = document.createElement("input");
-    valueInput.type = "number";
-    valueInput.min = "0";
-    valueInput.step = "0.01";
+    valueInput.type = "text";
+    valueInput.inputMode = "decimal";
     valueInput.placeholder = "R$ 0,00";
     valueInput.className = "extra-item__value";
     valueInput.value = value != null ? value : "";
+    enhanceNumericInput(valueInput, true);
 
     const removeButton = document.createElement("button");
     removeButton.type = "button";
@@ -167,7 +210,7 @@
     return Array.from(extraItemsContainer.querySelectorAll(".extra-item")).map(function (row) {
       return {
         name: row.querySelector(".extra-item__name").value,
-        value: Number(row.querySelector(".extra-item__value").value) || 0,
+        value: parseNumber(row.querySelector(".extra-item__value").value),
       };
     });
   }
@@ -538,7 +581,7 @@
     const filamentCost = pricing.calculateFilamentCost({
       weightUsedG: getWeightUsedG(),
       spoolPriceBRL: form.spoolPriceBRL.value,
-      spoolWeightG: Number(form.spoolWeightKg.value) * 1000,
+      spoolWeightG: parseNumber(form.spoolWeightKg.value) * 1000,
     });
 
     const timeCost = pricing.calculateTimeCost({
@@ -867,6 +910,26 @@
   updateLaborFieldsVisibility();
   updateWeightFieldsVisibility();
   populatePresetSelect();
+
+  [
+    "weightUsedG",
+    "weightBeforeG",
+    "weightAfterG",
+    "spoolPriceBRL",
+    "spoolWeightKg",
+    "powerCostPerHour",
+    "wearCostPerHour",
+    "laborFixedValue",
+    "laborHours",
+    "laborHourlyRate",
+    "marginPercent",
+    "roas",
+  ].forEach(function (id) {
+    enhanceNumericInput(document.getElementById(id), true);
+  });
+  ["printHoursPart", "printMinutesPart"].forEach(function (id) {
+    enhanceNumericInput(document.getElementById(id), false);
+  });
 
   if (extraItemsContainer.children.length === 0) {
     addExtraItemRow("Embalagem", "");

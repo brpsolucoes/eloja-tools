@@ -5,8 +5,10 @@
 (function (root) {
   "use strict";
 
+  // Aceita "," como separador decimal (vem direto dos campos da UI, que
+  // deixam o usuário digitar com vírgula) além do "." padrão do JS.
   function toNumber(value) {
-    const n = Number(value);
+    const n = Number(String(value).replace(",", "."));
     return Number.isFinite(n) ? n : 0;
   }
 

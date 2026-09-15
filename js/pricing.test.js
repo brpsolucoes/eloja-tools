@@ -25,6 +25,11 @@ test("calculateFilamentCost retorna 0 se peso do rolo for 0 (evita divisão por 
   assert.equal(cost, 0);
 });
 
+test("calculateFilamentCost aceita vírgula como separador decimal (vem direto dos campos da UI)", () => {
+  const cost = calculateFilamentCost({ weightUsedG: "12,5", spoolPriceBRL: "99,90", spoolWeightG: "1000" });
+  assert.ok(Math.abs(cost - (12.5 / 1000) * 99.9) < 1e-9);
+});
+
 test("calculateTimeCost soma energia e desgaste multiplicados pelas horas", () => {
   const cost = calculateTimeCost({ printHours: 4, powerCostPerHour: 0.5, wearCostPerHour: 1 });
   assert.equal(cost, 6);
