@@ -18,8 +18,8 @@
     </p>
 
     <form id="calc-form">
-      <section class="form-section">
-        <h2 class="form-section__title">Onde a peça será vendida?</h2>
+      <section class="form-section form-section--marketplace">
+        <h2 class="form-section__title"><span class="form-section__icon">🛒</span>Onde a peça será vendida?</h2>
         <p class="form-section__hint">As taxas do marketplace escolhido entram automaticamente no cálculo.</p>
         <div class="form-grid">
           <div class="field">
@@ -30,8 +30,8 @@
         <p class="field-note" id="marketplace-note"></p>
       </section>
 
-      <section class="form-section">
-        <h2 class="form-section__title">Filamento</h2>
+      <section class="form-section form-section--filament">
+        <h2 class="form-section__title"><span class="form-section__icon">🧵</span>Filamento</h2>
         <div class="form-grid">
           <div class="field">
             <label for="weightUsedG">Peso usado na peça (g)</label>
@@ -48,8 +48,8 @@
         </div>
       </section>
 
-      <section class="form-section">
-        <h2 class="form-section__title">Tempo e custos operacionais</h2>
+      <section class="form-section form-section--time">
+        <h2 class="form-section__title"><span class="form-section__icon">⏱️</span>Tempo e custos operacionais</h2>
         <div class="form-grid">
           <div class="field">
             <label for="printHours">Tempo de impressão (h)</label>
@@ -66,13 +66,13 @@
         </div>
       </section>
 
-      <section class="form-section">
-        <h2 class="form-section__title">Mão de obra</h2>
+      <section class="form-section form-section--labor">
+        <h2 class="form-section__title"><span class="form-section__icon">🧑‍🔧</span>Mão de obra</h2>
         <div class="radio-group" id="labor-mode-group">
           <label><input type="radio" name="laborMode" value="fixed" checked /> Valor fixo</label>
           <label><input type="radio" name="laborMode" value="hourly" /> Horas × valor/hora</label>
         </div>
-        <div class="form-grid" style="margin-top: 12px">
+        <div class="form-grid form-grid--spaced">
           <div class="field" id="labor-fixed-field">
             <label for="laborFixedValue">Valor fixo (R$)</label>
             <input type="number" id="laborFixedValue" name="laborFixedValue" min="0" step="0.01" value="0" />
@@ -88,15 +88,19 @@
         </div>
       </section>
 
-      <section class="form-section">
-        <h2 class="form-section__title">Custos extras</h2>
+      <section class="form-section form-section--extra">
+        <h2 class="form-section__title"><span class="form-section__icon">📦</span>Custos extras</h2>
         <p class="form-section__hint">Embalagem, gancho, etiqueta, frete de insumos, taxa de falha etc.</p>
+        <div class="extra-items__header">
+          <span>Nome do custo</span>
+          <span>Valor (R$)</span>
+        </div>
         <div class="extra-items" id="extra-items"></div>
         <button type="button" class="button" id="add-extra-item">+ Adicionar custo extra</button>
       </section>
 
-      <section class="form-section">
-        <h2 class="form-section__title">Margem e anúncios</h2>
+      <section class="form-section form-section--margin">
+        <h2 class="form-section__title"><span class="form-section__icon">📈</span>Margem e anúncios</h2>
         <div class="form-grid">
           <div class="field">
             <label for="marginPercent">Lucro desejado sobre o custo (%)</label>
