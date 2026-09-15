@@ -16,14 +16,14 @@ Novas ferramentas devem ser fáceis de adicionar: idealmente, um único ponto de
 
 Ao adicionar uma nova ferramenta ao hub, ela deve:
 
-- Ter sua própria spec em `specs/` descrevendo o que faz e suas regras de negócio.
-- Ter suas tasks de implementação em `tasks/`.
+- Ter sua própria spec em `.specs/` descrevendo o que faz e suas regras de negócio.
+- Ter suas tasks de implementação em `.tasks/`.
 - Seguir as regras técnicas ([[01-stack-tecnica]]) e visuais ([[02-design-visual]]) já estabelecidas.
 - Ser adicionada ao registro central de ferramentas do hub.
 
 ## Estado atual
 
 - [x] Hub definido conceitualmente (este documento)
-- [x] Implementação do hub — `index.html`, `css/main.css`, `js/tools.js`, `js/hub.js` (ver `tasks/hub-ferramentas.md`)
+- [x] Implementação do hub — `index.html`, `css/main.css`, `js/tools.js`, `js/hub.js` (ver `.tasks/hub-ferramentas.md`)
 - [ ] Publicação no GitHub Pages
-- [ ] Primeira ferramenta: calculadora de precificação 3D (ver `specs/calculadora-precificacao-3d.md`)
+- [x] Primeira ferramenta: calculadora de precificação 3D — `tools/precificacao-3d/` (ver `.specs/calculadora-precificacao-3d.md`)

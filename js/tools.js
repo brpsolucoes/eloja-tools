@@ -6,7 +6,7 @@ window.ELOJA_TOOLS = [
     name: "Calculadora de Precificação 3D",
     description: "Calcule o custo de produção e o preço sugerido de venda de peças impressas em 3D.",
     icon: "🧮",
-    url: "tools/precificacao-3d/",
-    status: "em-construcao", // "disponivel" | "em-construcao"
+    url: "tools/precificacao-3d/index.html",
+    status: "disponivel", // "disponivel" | "em-construcao"
   },
 ];
