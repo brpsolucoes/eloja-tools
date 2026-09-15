@@ -5,6 +5,7 @@
   "use strict";
 
   const STORAGE_KEY = "eloja-tools:precificacao-3d:custos-fixos";
+  const PRESETS_KEY = "eloja-tools:precificacao-3d:presets";
 
   const form = document.getElementById("calc-form");
   const marketplaceSelect = document.getElementById("marketplace");
@@ -16,6 +17,20 @@
   const laborFixedField = document.getElementById("labor-fixed-field");
   const laborHoursField = document.getElementById("labor-hours-field");
   const laborRateField = document.getElementById("labor-rate-field");
+
+  const weightDirectField = document.getElementById("weight-direct-field");
+  const weightBeforeField = document.getElementById("weight-before-field");
+  const weightAfterField = document.getElementById("weight-after-field");
+  const weightDiffNote = document.getElementById("weight-diff-note");
+
+  const presetSelect = document.getElementById("preset-select");
+  const presetNameInput = document.getElementById("preset-name");
+  const presetSaveButton = document.getElementById("preset-save");
+  const presetDeleteButton = document.getElementById("preset-delete");
+  const presetNote = document.getElementById("preset-note");
+
+  const mobilePriceBar = document.getElementById("mobile-price-bar");
+  const mobilePriceValue = document.getElementById("mobile-price-value");
 
   const currencyFormatter = new Intl.NumberFormat("pt-BR", { style: "currency", currency: "BRL" });
   const percentFormatter = new Intl.NumberFormat("pt-BR", { maximumFractionDigits: 1 });
@@ -55,6 +70,45 @@
     laborFixedField.hidden = mode !== "fixed";
     laborHoursField.hidden = mode !== "hourly";
     laborRateField.hidden = mode !== "hourly";
+  }
+
+  // --- Peso do filamento: direto ou por diferença de peso do carretel -----
+
+  function getWeightMode() {
+    const checked = form.querySelector('input[name="weightMode"]:checked');
+    return checked ? checked.value : "direct";
+  }
+
+  function updateWeightFieldsVisibility() {
+    const mode = getWeightMode();
+    weightDirectField.hidden = mode !== "direct";
+    weightBeforeField.hidden = mode !== "diff";
+    weightAfterField.hidden = mode !== "diff";
+    weightDiffNote.hidden = mode !== "diff";
+  }
+
+  function getWeightUsedG() {
+    if (getWeightMode() === "diff") {
+      const before = Number(form.weightBeforeG.value) || 0;
+      const after = Number(form.weightAfterG.value) || 0;
+      return Math.max(0, before - after);
+    }
+    return Number(form.weightUsedG.value) || 0;
+  }
+
+  function updateWeightDiffNote() {
+    if (getWeightMode() !== "diff") return;
+    const weight = getWeightUsedG();
+    weightDiffNote.hidden = false;
+    weightDiffNote.textContent = "Peso usado na peça: " + weight.toFixed(1) + " g";
+  }
+
+  // --- Tempo de impressão: horas + minutos ---------------------------------
+
+  function getPrintHours() {
+    const hoursPart = Number(form.printHoursPart.value) || 0;
+    const minutesPart = Number(form.printMinutesPart.value) || 0;
+    return hoursPart + minutesPart / 60;
   }
 
   // --- Custos extras: lista dinâmica --------------------------------------
@@ -102,6 +156,17 @@
     });
   }
 
+  function setExtraItems(items) {
+    extraItemsContainer.innerHTML = "";
+    if (Array.isArray(items) && items.length > 0) {
+      items.forEach(function (item) {
+        addExtraItemRow(item.name, item.value);
+      });
+    } else {
+      addExtraItemRow("Embalagem", "");
+    }
+  }
+
   // --- Persistência local dos custos fixos --------------------------------
 
   function saveFixedCosts() {
@@ -146,6 +211,152 @@
     }
   }
 
+  // --- Modelos salvos (presets) --------------------------------------------
+
+  function loadPresets() {
+    try {
+      const data = JSON.parse(localStorage.getItem(PRESETS_KEY));
+      return Array.isArray(data) ? data : [];
+    } catch (e) {
+      return [];
+    }
+  }
+
+  function savePresets(presets) {
+    try {
+      localStorage.setItem(PRESETS_KEY, JSON.stringify(presets));
+    } catch (e) {
+      // localStorage indisponível — segue sem persistir.
+    }
+  }
+
+  function snapshotFormData() {
+    return {
+      marketplace: marketplaceSelect.value,
+      weightMode: getWeightMode(),
+      weightUsedG: form.weightUsedG.value,
+      weightBeforeG: form.weightBeforeG.value,
+      weightAfterG: form.weightAfterG.value,
+      spoolPriceBRL: form.spoolPriceBRL.value,
+      spoolWeightKg: form.spoolWeightKg.value,
+      printHoursPart: form.printHoursPart.value,
+      printMinutesPart: form.printMinutesPart.value,
+      powerCostPerHour: form.powerCostPerHour.value,
+      wearCostPerHour: form.wearCostPerHour.value,
+      laborMode: form.laborMode.value,
+      laborFixedValue: form.laborFixedValue.value,
+      laborHours: form.laborHours.value,
+      laborHourlyRate: form.laborHourlyRate.value,
+      marginPercent: form.marginPercent.value,
+      roas: form.roas.value,
+      extraItems: getExtraItems(),
+    };
+  }
+
+  function applyFormData(data) {
+    if (!data) return;
+    if (data.marketplace && window.ELOJA_MARKETPLACE_FEES && window.ELOJA_MARKETPLACE_FEES[data.marketplace]) {
+      marketplaceSelect.value = data.marketplace;
+    }
+    if (data.weightMode) {
+      const radio = form.querySelector('input[name="weightMode"][value="' + data.weightMode + '"]');
+      if (radio) radio.checked = true;
+    }
+    if (data.weightUsedG != null) form.weightUsedG.value = data.weightUsedG;
+    if (data.weightBeforeG != null) form.weightBeforeG.value = data.weightBeforeG;
+    if (data.weightAfterG != null) form.weightAfterG.value = data.weightAfterG;
+    if (data.spoolPriceBRL != null) form.spoolPriceBRL.value = data.spoolPriceBRL;
+    if (data.spoolWeightKg != null) form.spoolWeightKg.value = data.spoolWeightKg;
+    if (data.printHoursPart != null) form.printHoursPart.value = data.printHoursPart;
+    if (data.printMinutesPart != null) form.printMinutesPart.value = data.printMinutesPart;
+    if (data.powerCostPerHour != null) form.powerCostPerHour.value = data.powerCostPerHour;
+    if (data.wearCostPerHour != null) form.wearCostPerHour.value = data.wearCostPerHour;
+    if (data.laborMode) {
+      const radio = form.querySelector('input[name="laborMode"][value="' + data.laborMode + '"]');
+      if (radio) radio.checked = true;
+    }
+    if (data.laborFixedValue != null) form.laborFixedValue.value = data.laborFixedValue;
+    if (data.laborHours != null) form.laborHours.value = data.laborHours;
+    if (data.laborHourlyRate != null) form.laborHourlyRate.value = data.laborHourlyRate;
+    if (data.marginPercent != null) form.marginPercent.value = data.marginPercent;
+    if (data.roas != null) form.roas.value = data.roas;
+    setExtraItems(data.extraItems);
+
+    updateMarketplaceNote();
+    updateLaborFieldsVisibility();
+    updateWeightFieldsVisibility();
+  }
+
+  function populatePresetSelect(selectedId) {
+    const presets = loadPresets();
+    presetSelect.innerHTML = "";
+    const emptyOption = document.createElement("option");
+    emptyOption.value = "";
+    emptyOption.textContent = "— Nenhum modelo carregado —";
+    presetSelect.appendChild(emptyOption);
+    presets.forEach(function (preset) {
+      const option = document.createElement("option");
+      option.value = preset.id;
+      option.textContent = preset.name;
+      presetSelect.appendChild(option);
+    });
+    presetSelect.value = selectedId || "";
+    presetDeleteButton.hidden = !presetSelect.value;
+  }
+
+  function showPresetNote(text) {
+    presetNote.hidden = !text;
+    presetNote.textContent = text || "";
+    if (text) {
+      window.setTimeout(function () {
+        presetNote.hidden = true;
+      }, 3000);
+    }
+  }
+
+  presetSaveButton.addEventListener("click", function () {
+    const name = presetNameInput.value.trim();
+    if (!name) {
+      presetNameInput.focus();
+      showPresetNote("Dê um nome para o modelo antes de salvar.");
+      return;
+    }
+    const presets = loadPresets();
+    const id = "preset-" + Date.now();
+    presets.push({ id: id, name: name, data: snapshotFormData() });
+    savePresets(presets);
+    populatePresetSelect(id);
+    presetNameInput.value = "";
+    showPresetNote('Modelo "' + name + '" salvo.');
+  });
+
+  presetSelect.addEventListener("change", function () {
+    const presets = loadPresets();
+    const preset = presets.find(function (p) {
+      return p.id === presetSelect.value;
+    });
+    presetDeleteButton.hidden = !presetSelect.value;
+    if (preset) {
+      applyFormData(preset.data);
+      onAnyChange();
+    }
+  });
+
+  presetDeleteButton.addEventListener("click", function () {
+    const presets = loadPresets();
+    const preset = presets.find(function (p) {
+      return p.id === presetSelect.value;
+    });
+    if (!preset) return;
+    if (!window.confirm('Excluir o modelo "' + preset.name + '"?')) return;
+    const remaining = presets.filter(function (p) {
+      return p.id !== preset.id;
+    });
+    savePresets(remaining);
+    populatePresetSelect(null);
+    showPresetNote('Modelo "' + preset.name + '" excluído.');
+  });
+
   // --- Cálculo e renderização do resultado --------------------------------
 
   function recalculate() {
@@ -153,14 +364,16 @@
     const fees = window.ELOJA_MARKETPLACE_FEES || {};
     const feeTable = fees[marketplaceSelect.value];
 
+    updateWeightDiffNote();
+
     const filamentCost = pricing.calculateFilamentCost({
-      weightUsedG: form.weightUsedG.value,
+      weightUsedG: getWeightUsedG(),
       spoolPriceBRL: form.spoolPriceBRL.value,
       spoolWeightG: Number(form.spoolWeightKg.value) * 1000,
     });
 
     const timeCost = pricing.calculateTimeCost({
-      printHours: form.printHours.value,
+      printHours: getPrintHours(),
       powerCostPerHour: form.powerCostPerHour.value,
       wearCostPerHour: form.wearCostPerHour.value,
     });
@@ -191,6 +404,62 @@
     });
 
     renderResult({ baseCost, filamentCost, timeCost, laborCost, extraCostsTotal, extraItems, result, feeTable });
+    updateMobilePriceBar(result);
+  }
+
+  function updateMobilePriceBar(result) {
+    if (!mobilePriceBar) return;
+    if (result.error) {
+      mobilePriceBar.hidden = true;
+      return;
+    }
+    mobilePriceBar.hidden = false;
+    mobilePriceValue.textContent = formatCurrency(result.price);
+  }
+
+  // --- Selo de lucro (verde/amarelo/vermelho conforme margem sobre o preço) --
+
+  function getProfitBadge(result) {
+    if (!result.price) return null;
+    const marginOnPrice = result.profit / result.price;
+    if (marginOnPrice < 0.15) {
+      return { className: "profit-badge--bad", icon: "🔴", label: "Margem apertada" };
+    }
+    if (marginOnPrice < 0.3) {
+      return { className: "profit-badge--ok", icon: "🟡", label: "Margem razoável" };
+    }
+    return { className: "profit-badge--good", icon: "🟢", label: "Margem saudável" };
+  }
+
+  // --- Copiar resumo do resultado -------------------------------------------
+
+  function buildSummaryText(data) {
+    const feeTable = data.feeTable;
+    const marketplaceLabel = feeTable ? feeTable.label : marketplaceSelect.value;
+    const lines = [
+      "Preço de venda sugerido: " + formatCurrency(data.result.price),
+      "Custo total: " + formatCurrency(data.baseCost),
+      "Lucro: " + formatCurrency(data.result.profit),
+      "Marketplace: " + marketplaceLabel,
+    ];
+    return lines.join("\n");
+  }
+
+  function copySummary(data, feedbackEl) {
+    const text = buildSummaryText(data);
+    const done = function () {
+      feedbackEl.textContent = "Copiado!";
+      window.setTimeout(function () {
+        feedbackEl.textContent = "";
+      }, 2000);
+    };
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      navigator.clipboard.writeText(text).then(done, function () {
+        feedbackEl.textContent = "Não foi possível copiar.";
+      });
+    } else {
+      feedbackEl.textContent = "Cópia não suportada neste navegador.";
+    }
   }
 
   function renderResult(data) {
@@ -213,10 +482,22 @@
     priceLabel.textContent = "Preço de venda sugerido";
     card.appendChild(priceLabel);
 
+    const priceRow = document.createElement("div");
+    priceRow.className = "result-card__price-row";
+
     const price = document.createElement("div");
     price.className = "result-card__price";
     price.textContent = formatCurrency(result.price);
-    card.appendChild(price);
+    priceRow.appendChild(price);
+
+    const badge = getProfitBadge(result);
+    if (badge) {
+      const badgeEl = document.createElement("span");
+      badgeEl.className = "profit-badge " + badge.className;
+      badgeEl.textContent = badge.icon + " " + badge.label;
+      priceRow.appendChild(badgeEl);
+    }
+    card.appendChild(priceRow);
 
     const stats = document.createElement("div");
     stats.className = "result-card__stats";
@@ -242,6 +523,16 @@
     }
     card.appendChild(stats);
 
+    if (result.feeAmount > 0 || result.feePct > 0) {
+      const tierNote = document.createElement("p");
+      tierNote.className = "fee-tier-note";
+      const pctText = percentFormatter.format(result.feePct * 100) + "%";
+      const fixedText = result.feeFixed > 0 ? " + " + formatCurrency(result.feeFixed) : "";
+      tierNote.textContent =
+        "Nessa faixa de preço, a taxa do marketplace é " + pctText + fixedText + " por item vendido.";
+      card.appendChild(tierNote);
+    }
+
     const breakdown = document.createElement("div");
     breakdown.className = "breakdown";
     breakdown.appendChild(breakdownRow("Filamento", formatCurrency(data.filamentCost)));
@@ -262,6 +553,21 @@
     }
     breakdown.appendChild(breakdownRow("Preço de venda", formatCurrency(result.price)));
     card.appendChild(breakdown);
+
+    const actions = document.createElement("div");
+    actions.className = "result-card__actions";
+    const copyButton = document.createElement("button");
+    copyButton.type = "button";
+    copyButton.className = "button";
+    copyButton.textContent = "📋 Copiar resumo";
+    const feedback = document.createElement("span");
+    feedback.className = "copy-feedback";
+    copyButton.addEventListener("click", function () {
+      copySummary(data, feedback);
+    });
+    actions.appendChild(copyButton);
+    actions.appendChild(feedback);
+    card.appendChild(actions);
 
     resultContainer.appendChild(card);
   }
@@ -303,6 +609,8 @@
   loadFixedCosts();
   updateMarketplaceNote();
   updateLaborFieldsVisibility();
+  updateWeightFieldsVisibility();
+  populatePresetSelect();
 
   if (extraItemsContainer.children.length === 0) {
     addExtraItemRow("Embalagem", "");
@@ -320,6 +628,13 @@
   Array.from(form.querySelectorAll('input[name="laborMode"]')).forEach(function (radio) {
     radio.addEventListener("change", function () {
       updateLaborFieldsVisibility();
+      onAnyChange();
+    });
+  });
+
+  Array.from(form.querySelectorAll('input[name="weightMode"]')).forEach(function (radio) {
+    radio.addEventListener("change", function () {
+      updateWeightFieldsVisibility();
       onAnyChange();
     });
   });
